@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:,">
+  <title>Appraisal Demand Signing</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #edf2f0;
+      --surface: #ffffff;
+      --surface-2: #f5f8f7;
+      --ink: #17221e;
+      --muted: #52625b;
+      --line: #ccd7d2;
+      --accent: #b92730;
+      --accent-dark: #8e1d25;
+      --green: #176c49;
+      --green-bg: #e4f4eb;
+      --error: #9c2830;
+      --error-bg: #fae8e9;
+      --shadow: 0 18px 55px rgba(25, 43, 36, .12);
+      --focus: #0b6b8c;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121916;
+        --surface: #1d2723;
+        --surface-2: #25312c;
+        --ink: #edf4f1;
+        --muted: #b5c2bc;
+        --line: #3c4b45;
+        --accent: #e35b63;
+        --accent-dark: #ca434c;
+        --green: #7bd2a9;
+        --green-bg: #17392b;
+        --error: #ff9fa5;
+        --error-bg: #422428;
+        --shadow: 0 20px 65px rgba(0,0,0,.34);
+        --focus: #65c8e6;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid color-mix(in srgb, var(--focus) 50%, transparent); outline-offset: 3px; }
+
+    .shell {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: clamp(24px, 5vw, 52px) clamp(16px, 4vw, 28px) 52px;
+    }
+    .intro { margin: 0 0 22px; }
+    .intro h1 {
+      margin: 0 0 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(31px, 7vw, 46px);
+      line-height: 1.06;
+      letter-spacing: -.025em;
+      font-weight: 700;
+    }
+    .intro p { margin: 0; color: var(--muted); font-size: 16px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .case-head {
+      padding: 24px 24px 22px;
+      border-bottom: 4px solid var(--accent);
+      background: var(--surface-2);
+    }
+    .document-title {
+      margin: 0 0 4px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(20px, 5vw, 27px);
+      line-height: 1.2;
+      color: var(--ink);
+    }
+    .document-sub {
+      margin: 0 0 18px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      color: var(--muted);
+    }
+    .facts { display: grid; gap: 12px; margin: 0; }
+    .fact { display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: baseline; }
+    .fact dt { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    .fact dd { margin: 0; font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+    .form-body { padding: 24px; }
+    .letter-para {
+      margin: 0 0 16px;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 17px;
+      line-height: 1.65;
+    }
+    .appraiser-block {
+      margin: 0 0 24px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent);
+      background: var(--surface-2);
+      border-radius: 0 10px 10px 0;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .appraiser-block .appraiser-label {
+      margin: 0 0 8px;
+      font-family: ui-sans-serif, -apple-system, sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .appraiser-block .appraiser-name { margin: 0 0 2px; font-size: 19px; font-weight: 700; }
+    .appraiser-block .appraiser-contact { margin: 0; font-size: 16px; }
+    .section-title { margin: 0 0 6px; font-size: 22px; line-height: 1.25; }
+    .affidavit {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-size: 15px;
+    }
+    .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .tab {
+      min-width: 92px;
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--ink);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .tab[aria-selected="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+
+    .sig-box {
+      width: 100%;
+      min-height: 132px;
+      padding: 18px;
+      border: 2px dashed var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--muted);
+      text-align: center;
+    }
+    .sig-box:hover { border-color: var(--accent); }
+    .sig-box img { max-width: 100%; height: 88px; object-fit: contain; }
+    .draw-prompt strong { display: block; color: var(--ink); font-size: 17px; margin-bottom: 4px; }
+    .type-panel { display: none; }
+    .type-panel.active, .draw-panel.active { display: block; }
+    .draw-panel:not(.active) { display: none; }
+    .field-label { display: block; margin-bottom: 7px; font-weight: 800; }
+    .text-input, .date-input {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 11px 13px;
+    }
+    .typed-preview {
+      min-height: 102px;
+      margin-top: 10px;
+      border-bottom: 1px solid var(--ink);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 12px 10px 7px;
+      color: var(--ink);
+      font-family: "Brush Script MT", "Segoe Script", cursive;
+      font-size: clamp(34px, 9vw, 52px);
+      line-height: 1;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
+    .details-grid { display: grid; grid-template-columns: 1fr 180px; gap: 16px; margin-top: 22px; }
+    .printed {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      font-weight: 700;
+    }
+    .consent {
+      display: grid;
+      grid-template-columns: 23px 1fr;
+      gap: 12px;
+      align-items: start;
+      margin: 22px 0 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      cursor: pointer;
+    }
+    .consent input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--accent); }
+    .consent span { font-size: 14px; line-height: 1.48; }
+    .validation { min-height: 23px; margin: 10px 0 0; color: var(--error); font-size: 14px; font-weight: 700; }
+    .send-btn {
+      width: 100%;
+      min-height: 56px;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 850;
+      font-size: 17px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(185,39,48,.22);
+    }
+    .send-btn:hover { background: var(--accent-dark); }
+    .send-btn:disabled { cursor: wait; opacity: .66; box-shadow: none; }
+    .status { display: none; margin-top: 16px; padding: 15px 16px; border-radius: 10px; font-weight: 750; }
+    .status.show { display: block; }
+    .status.success { color: var(--green); background: var(--green-bg); }
+    .status.failure { color: var(--error); background: var(--error-bg); }
+    .security-note { margin: 14px 2px 0; color: var(--muted); text-align: center; font-size: 12px; }
+
+    .link-error {
+      display: none;
+      max-width: 600px;
+      margin: 14vh auto 0;
+      padding: 28px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: 5px solid var(--accent);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .link-error h1 { margin: 0 0 9px; font-family: Georgia, "Times New Roman", serif; font-size: 29px; }
+    .link-error p { margin: 0; color: var(--muted); font-size: 17px; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-left)) max(14px, env(safe-area-inset-bottom));
+      background: rgba(8, 15, 12, .78);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.open { display: flex; }
+    .modal-card {
+      width: min(940px, 100%);
+      max-height: 96vh;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.4);
+      overflow: hidden;
+    }
+    .modal-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .modal-head h2 { margin: 0; font-size: 20px; }
+    .close-btn { border: 0; background: transparent; color: var(--muted); padding: 8px; font-weight: 800; cursor: pointer; }
+    .pad-wrap { padding: 14px; background: var(--surface-2); }
+    #signaturePad {
+      display: block;
+      width: 100%;
+      height: min(54vh, 430px);
+      background: #fff;
+      border: 1px solid #bfc8c3;
+      border-radius: 8px;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; padding: 14px 18px 18px; }
+    .action-btn { min-height: 46px; padding: 10px 18px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); font-weight: 800; cursor: pointer; }
+    .action-btn.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+    /* Dedicated PDF document: fixed-width letter canvas, tuned to fit ONE page. */
+    #pdfStage {
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      width: 816px;
+      pointer-events: none;
+      background: #fff;
+      color: #17201c;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .pdf-page {
+      width: 816px;
+      padding: 52px 66px 40px;
+      background: #fff;
+      color: #17201c;
+    }
+    .pdf-topline { height: 6px; background: #b92730; margin-bottom: 24px; }
+    .pdf-doc-label { font-family: Arial, sans-serif; font-size: 10px; color: #68746f; letter-spacing: .12em; margin-bottom: 20px; }
+    .pdf-title { margin: 0 0 6px; max-width: 640px; font-size: 29px; line-height: 1.12; letter-spacing: -.015em; }
+    .pdf-subtitle { margin: 0 0 22px; font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #68746f; }
+    .pdf-facts { margin: 0 0 24px; border-top: 1px solid #9ca9a3; }
+    .pdf-fact { display: grid; grid-template-columns: 165px 1fr; min-height: 36px; border-bottom: 1px solid #d2d9d6; align-items: center; }
+    .pdf-fact dt { font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #66736d; }
+    .pdf-fact dd { margin: 0; font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .012em; }
+    .pdf-body { margin: 0 0 12px; font-size: 14px; line-height: 1.58; letter-spacing: .012em; }
+    .pdf-appraiser { margin: 20px 0; padding: 14px 18px; border-left: 5px solid #b92730; background: #f4f6f5; }
+    .pdf-appraiser .pdf-appraiser-label { font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #66736d; margin-bottom: 5px; }
+    .pdf-appraiser .pdf-appraiser-name { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .pdf-appraiser .pdf-appraiser-contact { font-size: 13.5px; }
+    .pdf-signature-area { margin-top: 26px; }
+    .pdf-signature-mark { height: 84px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+    .pdf-signature-mark img { display: block; max-width: 430px; max-height: 78px; object-fit: contain; }
+    .pdf-typed-signature { font-family: "Brush Script MT", "Segoe Script", cursive; font-size: 46px; line-height: 1; text-align: center; }
+    .pdf-signature-line { border-top: 1.5px solid #17201c; padding-top: 6px; font-family: Arial, sans-serif; color: #66736d; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .pdf-meta { display: grid; grid-template-columns: 1.6fr .9fr; gap: 28px; margin-top: 20px; }
+    .pdf-value { min-height: 24px; padding-bottom: 5px; border-bottom: 1px solid #68746f; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: .012em; }
+    .pdf-label { padding-top: 5px; font-family: Arial, sans-serif; color: #66736d; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .pdf-footer { margin-top: 24px; display: flex; justify-content: space-between; gap: 20px; padding-top: 14px; border-top: 1px solid #d2d9d6; font-family: Arial, sans-serif; color: #68746f; font-size: 10px; letter-spacing: .012em; }
+
+    @media (max-width: 590px) {
+      .shell { padding-left: 13px; padding-right: 13px; padding-top: 24px; }
+      .case-head, .form-body { padding-left: 18px; padding-right: 18px; }
+      .fact { grid-template-columns: 1fr; gap: 2px; }
+      .details-grid { grid-template-columns: 1fr; }
+      .card { border-radius: 13px; }
+      .modal-actions { justify-content: stretch; }
+      .modal-actions .action-btn { flex: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <main class="shell" id="app" hidden>
+    <section class="intro">
+      <h1>Appraisal demand</h1>
+      <p>Review the letter below, add your signature, and send the signed demand.</p>
+    </section>
+
+    <section class="card" aria-labelledby="documentTitle">
+      <header class="case-head">
+        <h2 class="document-title" id="documentTitle">APPRAISAL DEMAND</h2>
+        <p class="document-sub">FORMAL NOTICE TO INVOKE THE POLICY APPRAISAL PROVISION</p>
+        <dl class="facts" id="facts"></dl>
+      </header>
+
+      <div class="form-body">
+        <div id="letterBody"></div>
+
+        <div class="appraiser-block">
+          <p class="appraiser-label">Policyholder's selected appraiser</p>
+          <p class="appraiser-name" id="appraiserName"></p>
+          <p class="appraiser-contact" id="appraiserContact"></p>
+        </div>
+
+        <section aria-labelledby="signatureHeading">
+          <h2 class="section-title" id="signatureHeading">Add your signature</h2>
+          <p class="affidavit">&ldquo;Your signature below invokes the appraisal provision of your policy for the claim above and authorizes submission of this demand.&rdquo;</p>
+
+          <div class="tabs" role="tablist" aria-label="Signature method">
+            <button class="tab" id="drawTab" type="button" role="tab" aria-selected="true" aria-controls="drawPanel">Draw</button>
+            <button class="tab" id="typeTab" type="button" role="tab" aria-selected="false" aria-controls="typePanel">Type</button>
+          </div>
+
+          <div class="draw-panel active" id="drawPanel" role="tabpanel" aria-labelledby="drawTab">
+            <button class="sig-box" id="openPad" type="button" aria-label="Open signature pad">
+              <span class="draw-prompt" id="drawPrompt"><strong>Tap to sign</strong>A larger signature pad will open.</span>
+              <img id="drawnPreview" alt="Your drawn signature" hidden>
+            </button>
+          </div>
+
+          <div class="type-panel" id="typePanel" role="tabpanel" aria-labelledby="typeTab">
+            <label class="field-label" for="typedName">Type your signature</label>
+            <input class="text-input" id="typedName" autocomplete="name" inputmode="text" placeholder="Type your full name">
+            <div class="typed-preview" id="typedPreview" aria-live="polite">Your signature</div>
+          </div>
+
+          <div class="details-grid">
+            <div>
+              <span class="field-label">Printed name</span>
+              <div class="printed" id="printedName"></div>
+            </div>
+            <div>
+              <label class="field-label" for="signDate">Date</label>
+              <input class="date-input" id="signDate" type="date" required>
+            </div>
+          </div>
+
+          <label class="consent">
+            <input id="consent" type="checkbox" required>
+            <span>I confirm I am invoking the appraisal provision of my insurance policy for the claim above and agree that my electronic signature may be applied to this appraisal demand</span>
+          </label>
+
+          <p class="validation" id="validation" role="alert" aria-live="assertive"></p>
+          <button class="send-btn" id="sendButton" type="button">Finish &amp; Send</button>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+          <p class="security-note">Please tap once and keep this page open until the confirmation appears.</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <section class="link-error" id="linkError" role="alert">
+    <h1>We need a new link</h1>
+    <p>This signing link is incomplete. Please contact us for a new link.</p>
+  </section>
+
+  <div class="modal" id="padModal" role="dialog" aria-modal="true" aria-labelledby="padTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="padTitle">Draw your signature</h2>
+        <button class="close-btn" id="closePad" type="button">Cancel</button>
+      </div>
+      <div class="pad-wrap"><canvas id="signaturePad"></canvas></div>
+      <div class="modal-actions">
+        <button class="action-btn" id="undoPad" type="button">Undo</button>
+        <button class="action-btn" id="clearPad" type="button">Clear</button>
+        <button class="action-btn primary" id="donePad" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pdfStage" aria-hidden="true">
+    <article class="pdf-page" id="pdfPage">
+      <div class="pdf-topline"></div>
+      <div class="pdf-doc-label">APPRAISAL DEMAND &bull; POLICY APPRAISAL PROVISION</div>
+      <h1 class="pdf-title">APPRAISAL DEMAND</h1>
+      <p class="pdf-subtitle">FORMAL NOTICE TO INVOKE THE POLICY APPRAISAL PROVISION</p>
+      <dl class="pdf-facts" id="pdfFacts"></dl>
+      <div id="pdfLetterBody"></div>
+      <div class="pdf-appraiser">
+        <div class="pdf-appraiser-label">POLICYHOLDER'S SELECTED APPRAISER</div>
+        <div class="pdf-appraiser-name" id="pdfAppraiserName"></div>
+        <div class="pdf-appraiser-contact" id="pdfAppraiserContact"></div>
+      </div>
+      <section class="pdf-signature-area">
+        <div class="pdf-signature-mark" id="pdfSignatureMark"></div>
+        <div class="pdf-signature-line">Policyholder's signature</div>
+        <div class="pdf-meta">
+          <div><div class="pdf-value" id="pdfPrintedName"></div><div class="pdf-label">Printed name</div></div>
+          <div><div class="pdf-value" id="pdfDate"></div><div class="pdf-label">Date</div></div>
+        </div>
+      </section>
+      <footer class="pdf-footer"><span id="pdfFooterIdentity"></span><span>Signed appraisal demand</span></footer>
+    </article>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var DATA = {"endpoint": "https://script.google.com/macros/s/AKfycbwfFtu66WgrVre0CVfaZvd5EJEB3IfHgDt8WH6MMSC9cLPY5T_zYUU55dZyHphMIeCY/exec", "person": "Roman Williams", "job": "25-3419", "claim": "062374812", "policy": "OF3455725", "property": "251 GlynLakes Dr, Pike Road, AL 36064", "phone": "", "company": "Liberty Mutual", "letterDate": "November 05, 2026", "lossDate": "May 6, 2026", "appraiserName": "R. Lee Cooper", "appraiserContact": "RLeecooper1980@gmail.com | 251-895-0373"};
+
+      var ENDPOINT = DATA.endpoint;
+      var person = DATA.person;
+      var job = DATA.job;
+      var claim = DATA.claim;
+      var policy = DATA.policy;
+      var property = DATA.property;
+      var phone = DATA.phone;
+      var company = DATA.company;
+      var letterDate = DATA.letterDate;
+      var lossDate = DATA.lossDate;
+      var appraiserName = DATA.appraiserName;
+      var appraiserContact = DATA.appraiserContact;
+
+      var app = document.getElementById("app");
+      var linkError = document.getElementById("linkError");
+      if (!person || !claim) {
+        linkError.style.display = "block";
+        return;
+      }
+      app.hidden = false;
+
+      var fields = [
+        ["HOMEOWNER", person],
+        company ? ["INSURANCE COMPANY", company] : null,
+        ["CLAIM NUMBER", claim],
+        policy ? ["POLICY NUMBER", policy] : null,
+        property ? ["PROPERTY", property] : null,
+        lossDate ? ["DATE OF LOSS", lossDate] : null,
+        phone ? ["PHONE", phone] : null,
+        letterDate ? ["LETTER DATE", letterDate] : null
+      ].filter(Boolean);
+
+      function factMarkup(items, pdf) {
+        return items.map(function (item) {
+          return '<div class="' + (pdf ? "pdf-fact" : "fact") + '"><dt>' + escapeHtml(item[0]) + '</dt><dd>' + escapeHtml(item[1]) + '</dd></div>';
+        }).join("");
+      }
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, function (ch) {
+          return {"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch];
+        });
+      }
+      function letterParagraphs() {
+        return [
+          "To Whom It May Concern:",
+          "I, the undersigned policyholder, disagree with the amount of loss determined and/or estimated by my insurance carrier for the above-referenced claim. I believe the amount issued or proposed is insufficient to restore my property to its pre-loss condition.",
+          "Therefore, I hereby exercise my Right to Appraisal pursuant to the terms and conditions of my insurance policy. This letter shall serve as my formal written notice and demand to invoke the appraisal provision of the policy.",
+          "Please direct all communications, information, estimates, reports, photographs, and other documentation relating to the appraisal process to " + appraiserName + ".",
+          "Please provide the name and contact information of the appraiser selected by the insurance company within 20 days of receipt of this notice, as required by the applicable policy provisions and/or law.",
+          "If the insurance company declines or denies my demand for appraisal, please provide the specific basis for that decision in writing, including the applicable policy language supporting the denial.",
+          "Thank you for your prompt attention to this matter. Sincerely,"
+        ];
+      }
+
+      document.getElementById("facts").innerHTML = factMarkup(fields, false);
+      document.getElementById("pdfFacts").innerHTML = factMarkup(fields, true);
+      document.getElementById("letterBody").innerHTML = letterParagraphs().map(function (p) {
+        return '<p class="letter-para">' + escapeHtml(p) + "</p>";
+      }).join("");
+      document.getElementById("pdfLetterBody").innerHTML = letterParagraphs().map(function (p) {
+        return '<p class="pdf-body">' + escapeHtml(p) + "</p>";
+      }).join("");
+      document.getElementById("appraiserName").textContent = appraiserName;
+      document.getElementById("appraiserContact").textContent = appraiserContact;
+      document.getElementById("pdfAppraiserName").textContent = appraiserName;
+      document.getElementById("pdfAppraiserContact").textContent = appraiserContact;
+      document.getElementById("printedName").textContent = person;
+      document.getElementById("pdfPrintedName").textContent = person;
+      document.getElementById("pdfFooterIdentity").textContent = person;
+
+      var dateInput = document.getElementById("signDate");
+      var now = new Date();
+      var localToday = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      dateInput.value = localToday;
+
+      var signatureMode = "draw";
+      var drawnSignature = "";
+      var typedName = document.getElementById("typedName");
+      var typedPreview = document.getElementById("typedPreview");
+      var drawTab = document.getElementById("drawTab");
+      var typeTab = document.getElementById("typeTab");
+      var drawPanel = document.getElementById("drawPanel");
+      var typePanel = document.getElementById("typePanel");
+
+      function setMode(mode) {
+        signatureMode = mode;
+        var drawing = mode === "draw";
+        drawTab.setAttribute("aria-selected", String(drawing));
+        typeTab.setAttribute("aria-selected", String(!drawing));
+        drawPanel.classList.toggle("active", drawing);
+        typePanel.classList.toggle("active", !drawing);
+        document.getElementById("validation").textContent = "";
+        if (!drawing) typedName.focus();
+      }
+      drawTab.addEventListener("click", function () { setMode("draw"); });
+      typeTab.addEventListener("click", function () { setMode("type"); });
+      typedName.addEventListener("input", function () {
+        typedPreview.textContent = typedName.value.trim() || "Your signature";
+      });
+
+      var modal = document.getElementById("padModal");
+      var canvas = document.getElementById("signaturePad");
+      var ctx = canvas.getContext("2d");
+      var drawing = false;
+      var moved = false;
+      var undoStack = [];
+      var lastPoint = null;
+      var savedBeforeOpen = "";
+
+      function sizeCanvas() {
+        var rect = canvas.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var previous = canvas.width ? canvas.toDataURL("image/png") : "";
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#15201b";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        if (savedBeforeOpen || previous) loadCanvasImage(savedBeforeOpen || previous);
+      }
+      function loadCanvasImage(src) {
+        if (!src) return;
+        var image = new Image();
+        image.onload = function () {
+          var rect = canvas.getBoundingClientRect();
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, rect.width, rect.height);
+          ctx.drawImage(image, 0, 0, rect.width, rect.height);
+        };
+        image.src = src;
+      }
+      function pointFromEvent(event) {
+        var rect = canvas.getBoundingClientRect();
+        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      }
+      function canvasSnapshot() { return canvas.toDataURL("image/png"); }
+      canvas.addEventListener("pointerdown", function (event) {
+        event.preventDefault();
+        canvas.setPointerCapture(event.pointerId);
+        undoStack.push(canvasSnapshot());
+        if (undoStack.length > 20) undoStack.shift();
+        drawing = true;
+        moved = false;
+        lastPoint = pointFromEvent(event);
+      });
+      canvas.addEventListener("pointermove", function (event) {
+        if (!drawing) return;
+        event.preventDefault();
+        var point = pointFromEvent(event);
+        ctx.beginPath();
+        ctx.moveTo(lastPoint.x, lastPoint.y);
+        ctx.lineTo(point.x, point.y);
+        ctx.stroke();
+        lastPoint = point;
+        moved = true;
+      });
+      function stopDrawing(event) {
+        if (!drawing) return;
+        if (!moved && lastPoint) {
+          ctx.beginPath();
+          ctx.arc(lastPoint.x, lastPoint.y, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#15201b";
+          ctx.fill();
+        }
+        drawing = false;
+        if (event && canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      }
+      canvas.addEventListener("pointerup", stopDrawing);
+      canvas.addEventListener("pointercancel", stopDrawing);
+
+      function openPad() {
+        savedBeforeOpen = drawnSignature;
+        undoStack = [];
+        modal.classList.add("open");
+        document.body.style.overflow = "hidden";
+        requestAnimationFrame(function () { sizeCanvas(); document.getElementById("donePad").focus(); });
+      }
+      function closePad() {
+        modal.classList.remove("open");
+        document.body.style.overflow = "";
+        document.getElementById("openPad").focus();
+      }
+      document.getElementById("openPad").addEventListener("click", openPad);
+      document.getElementById("closePad").addEventListener("click", closePad);
+      modal.addEventListener("click", function (event) { if (event.target === modal) closePad(); });
+      document.addEventListener("keydown", function (event) { if (event.key === "Escape" && modal.classList.contains("open")) closePad(); });
+      document.getElementById("clearPad").addEventListener("click", function () {
+        undoStack.push(canvasSnapshot());
+        var rect = canvas.getBoundingClientRect();
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, rect.width, rect.height);
+      });
+      document.getElementById("undoPad").addEventListener("click", function () {
+        if (undoStack.length) loadCanvasImage(undoStack.pop());
+      });
+      document.getElementById("donePad").addEventListener("click", function () {
+        drawnSignature = canvasSnapshot();
+        var preview = document.getElementById("drawnPreview");
+        preview.src = drawnSignature;
+        preview.hidden = false;
+        document.getElementById("drawPrompt").hidden = true;
+        closePad();
+      });
+      window.addEventListener("resize", function () { if (modal.classList.contains("open")) sizeCanvas(); });
+
+      function formatDate(iso) {
+        if (!iso) return "";
+        var parts = iso.split("-");
+        return parts[1] + "/" + parts[2] + "/" + parts[0];
+      }
+      function validate() {
+        var message = "";
+        if (signatureMode === "draw" && !drawnSignature) message = "Please add your signature.";
+        if (signatureMode === "type" && !typedName.value.trim()) message = "Please type your signature.";
+        if (!dateInput.value) message = "Please enter the signing date.";
+        if (!document.getElementById("consent").checked) message = "Please confirm the statement before sending.";
+        document.getElementById("validation").textContent = message;
+        return !message;
+      }
+      function updatePdfSignature() {
+        var holder = document.getElementById("pdfSignatureMark");
+        holder.innerHTML = "";
+        if (signatureMode === "draw") {
+          var image = document.createElement("img");
+          image.src = drawnSignature;
+          image.alt = "";
+          holder.appendChild(image);
+        } else {
+          var text = document.createElement("div");
+          text.className = "pdf-typed-signature";
+          text.textContent = typedName.value.trim();
+          holder.appendChild(text);
+        }
+        document.getElementById("pdfDate").textContent = formatDate(dateInput.value);
+      }
+
+      document.getElementById("sendButton").addEventListener("click", async function () {
+        var button = this;
+        var status = document.getElementById("status");
+        status.className = "status";
+        status.textContent = "";
+        if (!validate()) return;
+        if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+          status.className = "status failure show";
+          status.textContent = "The document tools did not load. Please check your connection and try again.";
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Preparing your letter\u2026";
+        updatePdfSignature();
+        try {
+          if (document.fonts && document.fonts.ready) await document.fonts.ready;
+          var page = document.getElementById("pdfPage");
+          var rendered = await window.html2canvas(page, {
+            scale: 2,
+            width: 816,
+            windowWidth: 816,
+            backgroundColor: "#ffffff",
+            useCORS: true,
+            logging: false
+          });
+          var pdf = new window.jspdf.jsPDF({ orientation: "portrait", unit: "pt", format: "letter", compress: true });
+          pdf.setProperties({ title: "Signed appraisal demand - " + person + " - " + job, subject: "Signed appraisal demand", author: person, creator: "Appraisal Demand Signing" });
+          var pageW = 612, pageH = 792;
+          var imgData = rendered.toDataURL("image/jpeg", .92);
+          var totalH = rendered.height * (pageW / rendered.width);
+          var pageCount = Math.max(1, Math.ceil(totalH / pageH));
+          for (var i = 0; i < pageCount; i++) {
+            if (i > 0) pdf.addPage();
+            pdf.addImage(imgData, "JPEG", 0, -(i * pageH), pageW, totalH, undefined, "FAST");
+          }
+          var dataUri = pdf.output("datauristring");
+          var pdfBase64 = dataUri.substring(dataUri.indexOf(",") + 1);
+          var payload = {
+            pdfBase64: pdfBase64,
+            filename: "Signed appraisal demand - " + person + " - " + job + ".pdf",
+            subject: "Signed appraisal demand \u2014 " + person + " " + job,
+            body: "Signed appraisal demand attached for " + person + " (job " + job + ")."
+          };
+
+          button.textContent = "Sending\u2026";
+          await fetch(ENDPOINT, {
+            method: "POST",
+            mode: "no-cors",
+            credentials: "omit",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(payload)
+          });
+
+          status.className = "status success show";
+          status.textContent = "Thank you \u2014 your signed letter has been sent.";
+          button.textContent = "Sent";
+          button.disabled = true;
+          status.scrollIntoView({ behavior: "smooth", block: "center" });
+        } catch (error) {
+          status.className = "status failure show";
+          status.textContent = "We couldn't send the letter. Please check your connection and try again.";
+          button.disabled = false;
+          button.textContent = "Finish & Send";
+        }
+      });
+    }());
+  </script>
+</body>
+</html>
